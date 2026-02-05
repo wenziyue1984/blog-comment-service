@@ -1,0 +1,42 @@
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #打印sql语句,调试用
+
+logging:
+  level:
+    com.wzy: DEBUG # 根日志级别
+    com.baomidou.mybatisplus.extension.handlers: DEBUG
+
+rocketmq:
+  name-server: ${ROCKET_MQ_SERVER_DEV}
+  consumer:
+    group: ["article-pv-consumer-group", "comment-like-consumer-group", "chat-records-save-consumer-group"]
+
+wenziyue:
+  # wenziyue-uid-starter
+  uid:
+    step: 10
+    prepare-next-percent: 70
+  swagger:
+    active-profiles: dev,test
+    title: Wenziyue Blog Comment API
+    version: 0.0.1
+    base-package: com.wenziyue.blog.comment.web   # 只扫描 Controller 包
+    server-base-path: /api/comment           # 可选：为 OpenAPI 声明统一前缀，配合网关路由使用
+
+# swagger-ui 配置
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+#    url: /v3/api-docs          # 明确告诉 UI 去这里拿接口定义
+    # 关键是下面两行：告诉 swagger 所有东西都走网关前缀 /api/user
+    config-url: /api/comment/v3/api-docs/swagger-config
+    url: /api/comment/v3/api-docs
+
+
+blog:
+  service-url:
+    article: ${ARTICLE_SERVICE_URL_DEV} # 文章服务端口
+    user: ${USER_SERVICE_URL_DEV}

@@ -1,0 +1,122 @@
+server:
+  port: 8083
+#  servlet:
+#    context-path: /comment
+
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/${DB_NAME:db}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USER:name}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource # 指定使用 Druid 数据源
+    druid:
+      initial-size: 5 # 初始化时建立的连接数
+      max-active: 20 # 最大连接池数量
+      min-idle: 5 # 最小空闲连接数
+      max-wait: 60000 # 获取连接的最大等待时间（毫秒）
+      pool-prepared-statements: true # 是否启用预编译语句池
+      max-pool-prepared-statement-per-connection-size: 20 # 每个连接的最大预编译语句池大小
+      validation-query: SELECT 1 # 用于验证连接是否有效的 SQL 查询
+      test-on-borrow: false # 申请连接时是否执行 validationQuery 检测连接有效性
+      test-on-return: false # 归还连接时是否执行 validationQuery 检测连接有效性
+      test-while-idle: true # 空闲时是否执行 validationQuery 检测连接有效性
+      time-between-eviction-runs-millis: 60000 # 空闲连接回收器运行的时间间隔（毫秒）
+      min-evictable-idle-time-millis: 300000 # 连接在池中最小空闲时间（毫秒）
+      filters: stat,wall # 配置监控统计拦截器（stat）、SQL 防火墙（wall）
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      database: 0
+      password:
+      timeout: 5000
+
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 2
+          max-wait: 5000ms
+  flyway:
+    enabled: true
+    locations: classpath:flyway
+    baseline-on-migrate: true   # 第一次启动自动 baseline
+    baseline-version: 0
+    create-schemas: true  # 如果不存在目标schema, 自动创建
+    table: flyway_schema_history_comment
+  task:
+    scheduling:
+      shutdown:
+        await-termination: true # 关机时等待所有任务执行完毕
+        await-termination-period: 20s # 最多等待时间
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true #驼峰命名
+  mapper-locations: classpath*:mapper/*.xml
+  type-aliases-package: com.wenziyue.blog.comment.dal.entity
+
+
+rocketmq:
+  name-server: ${ROCKET_MQ_SERVER}
+  producer:
+    send-message-timeout: 10000 # 默认是 3000 毫秒
+    group: default-producer
+  consumer:
+    group: ["article-pv-consumer-group", "comment-like-consumer-group", "chat-records-save-consumer-group", "notify-outbox-consumer-group"]
+
+
+wenziyue:
+  # wenziyue-uid-starter
+  uid:
+    biz-tag: blog
+    step: 1000  # 每次获取号段长度
+    init-id: 10000000000000000  #  ID从10000000000000000开始
+    prepare-next-percent: 80  # 使用当前号段多少百分比时预加载下一个号段
+    auto-create-table: true  # 是否依赖flyway自动建表，默认true
+  # wenziyue-idempotent-starter
+  idempotent:
+    enabled: true          # 是否启用（默认 true）
+    default-timeout: 60    # 默认过期秒数，默认60s
+  # wenziyue-swagger-starter
+  swagger:
+    active-profiles: dev,test
+    title: Wenziyue Blog Comment API
+    version: 0.0.1
+    base-package: com.wenziyue.blog.comment.web   # 只扫描 Controller 包
+    server-base-path: /api/comment           # 可选：为 OpenAPI 声明统一前缀，配合网关路由使用
+
+
+# swagger-ui 配置
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+#    url: /v3/api-docs          # 明确告诉 UI 去这里拿接口定义
+    # 关键是下面两行：告诉 swagger 所有东西都走网关前缀 /api/user
+    config-url: /api/comment/v3/api-docs/swagger-config
+    url: /api/comment/v3/api-docs
+
+
+logging:
+  level:
+    root: INFO
+  file:
+    path: ./.logs/comment
+
+
+logback:
+  filesize: 50MB
+  filemaxday: 30
+
+blog:
+  init-admin: true  # 是否尝试初始化admin账号，默认false
+  default-admin-name: ${DEFAULT_ADMIN_NAME:admin} # 默认admin账号
+  default-admin-password: ${DEFAULT_ADMIN_PASSWORD:password}  # 默认admin密码
+  chat-last-time-zSet-size: 10000
+  service-url:
+    article: ${ARTICLE_SERVICE_URL} # 文章服务端口
+    user: ${USER_SERVICE_URL}

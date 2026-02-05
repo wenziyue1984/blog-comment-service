@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenziyue.blog.comment.dal.mapper.CommentMapper">
+
+    <select id="getTwoLevelCommentForOneLevelComment" resultType="com.wenziyue.blog.comment.dal.dto.CommentDTO">
+        WITH ranked AS (
+        SELECT
+        id, parent_id, content, create_time, reply_user_id, user_id, article_id, status, like_count,
+        ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY like_count DESC) AS rn
+        FROM TB_WZY_BLOG_COMMENT
+        WHERE level_one_id IN
+        <foreach collection="oneLevelCommentIdList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+        )
+        SELECT
+        t0.article_id as articleId,
+        t0.id as id,
+        t0.content as content,
+        t0.create_time as createTime,
+        t0.reply_user_id as replyUserId,
+        t0.user_id as userId,
+        t0.parent_id as parentId,
+        t0.status as status,
+        t0.like_count as likeCount
+        FROM ranked t0
+        WHERE t0.rn &lt;= #{limit}
+        ORDER BY t0.parent_id, t0.create_time
+    </select>
+
+
+    <select id="oneLevelCommentPage" resultType="com.wenziyue.blog.comment.dal.dto.CommentDTO">
+        SELECT t0.article_id  as articleId,
+               t0.id          as id,
+               t0.content     as content,
+               t0.create_time as createTime,
+               t0.user_id     as userId,
+               t0.status      as status,
+               t0.like_count  as likeCount,
+            (SELECT COUNT(*) FROM TB_WZY_BLOG_COMMENT t1 WHERE t1.level_one_id = t0.id AND t1.deleted = 0) as childrenTotalCount
+        FROM TB_WZY_BLOG_COMMENT
+        WHERE t0.deleted = 0
+          AND t0.article_id = #{articleId}
+          AND t0.level_one_id IS NULL
+          AND t0.status=0
+        ORDER BY
+            <choose>
+                <when test="dto != null and dto.sort == 2">
+                    t0.like_count DESC, t0.id ASC
+                </when>
+                <when test="dto != null and dto.sort == 1">
+                    t0.create_time DESC, t0.id DESC
+                </when>
+                <otherwise>
+                    t0.create_time ASC, t0.id ASC
+                </otherwise>
+            </choose>
+    </select>
+
+    <select id="twoLevelCommentPage" resultType="com.wenziyue.blog.comment.dal.dto.CommentDTO">
+        SELECT t0.article_id    as articleId,
+               t0.id            as id,
+               t0.content       as content,
+               t0.create_time   as createTime,
+               t0.user_id       as userId,
+               t0.reply_user_id as replyUserId,
+               t0.status        as status,
+               t0.like_count  as likeCount
+        FROM TB_WZY_BLOG_COMMENT t0
+        WHERE t0.deleted = 0
+          AND t0.article_id = #{articleId}
+          AND t0.level_one_id = #{oneLevelCommentId}
+          AND t0.status = 0
+        ORDER BY t0.create_time ASC, t0.id ASC
+    </select>
+
+    <update id="batchApplyLikeDeltas">
+        UPDATE TB_WZY_BLOG_COMMENT
+        SET like_count = GREATEST(
+            like_count + CASE id
+            <foreach collection="items" item="it">
+                WHEN #{it.commentId} THEN #{it.delta}
+            </foreach>
+            END,
+            0
+        )
+        WHERE id IN
+        <foreach collection="items" item="it" open="(" separator="," close=")">
+            #{it.commentId}
+        </foreach>
+    </update>
+</mapper>

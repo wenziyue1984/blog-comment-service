@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.wenziyue</groupId>
+    <artifactId>blog-comment-service</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>common</module>
+        <module>infra</module>
+        <module>dal</module>
+        <module>biz</module>
+        <module>web</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
+        <wenziyue.bom.version>1.0.10</wenziyue.bom.version>
+        <wenziyue.framework.starter.version>1.0.8</wenziyue.framework.starter.version>
+        <wenziyue.redis.starter.version>1.0.18</wenziyue.redis.starter.version>
+        <wenziyue.mybatis.plus.starter.version>1.0.2</wenziyue.mybatis.plus.starter.version>
+        <wenziyue.auth.starter.version>1.0.12</wenziyue.auth.starter.version>
+        <wenziyue.feign.starter.version>1.0.1</wenziyue.feign.starter.version>
+        <wenziyue.swagger.starter.version>1.0.2</wenziyue.swagger.starter.version>
+        <wenziyue.uid.starter.version>1.0.2</wenziyue.uid.starter.version>
+        <wenziyue.idempotent.starter.version>1.0.3</wenziyue.idempotent.starter.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.wenziyue</groupId>
+                <artifactId>wenziyue-bom</artifactId>
+                <version>${wenziyue.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.wenziyue</groupId>
+                <artifactId>wenziyue-framework-starter</artifactId>
+                <version>${wenziyue.framework.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wenziyue</groupId>
+                <artifactId>wenziyue-mybatis-plus-starter</artifactId>
+                <version>${wenziyue.mybatis.plus.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wenziyue</groupId>
+                <artifactId>wenziyue-redis-starter</artifactId>
+                <version>${wenziyue.redis.starter.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.wenziyue</groupId>
+                <artifactId>wenziyue-auth-starter</artifactId>
+                <version>${wenziyue.auth.starter.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.wenziyue</groupId>
+                <artifactId>wenziyue-feign-starter</artifactId>
+                <version>${wenziyue.feign.starter.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.wenziyue</groupId>
+                <artifactId>wenziyue-swagger-starter</artifactId>
+                <version>${wenziyue.swagger.starter.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.wenziyue</groupId>
+                <artifactId>wenziyue-uid-starter</artifactId>
+                <version>${wenziyue.uid.starter.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.wenziyue</groupId>
+                <artifactId>wenziyue-idempotent-starter</artifactId>
+                <version>${wenziyue.idempotent.starter.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- 编译插件配置 -->
+    <build>
+        <plugins>
+            <!-- Maven Compiler 插件，指定 Java 版本 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
